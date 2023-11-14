@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit User</title>
+    <style>
+        body {
+            background-color: white;
+            color: #333;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        main {
+            margin-top: 70px;
+            padding: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 30%;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            background-color: #C2B280;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 10px;
+            margin-left: auto;
+        }
+
+        .btn-primary:hover {
+            background-color: #A58E5D;
+        }
+
+        .alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        footer {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .logout-btn {
+            position: fixed;
+            top: 25px;
+            right: 30px;
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Avicena Library</h2>
+    </header>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    <main>
+        <a href="{{ url_for('admin_home') }}" style="text-decoration: none; color: #bc9055;">&larr; Back to Home</a>
+        <h1>Edit User</h1>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                <label for="username">Username:</label>
+                {{ form.username(class="form-control", required="required") }}
+            </div>
+        
+            <div class="form-group">
+                <label for="password">Password:</label>
+                {% if form.password.label.text %}
+                    {{ form.password(class="form-control", required="required", value=form.password.data) }}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="is_admin">Admin User:</label>
+                {{ form.is_admin(class="form-check-input") }}
+            </div>
+        
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </main>
+    <footer>
+        <p>© Avicena Library 2023</p>
+    </footer>
+
+    <script>
+        // Check the edit result query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const edited_user = urlParams.get('edited_user');
+        const existing_user = urlParams.get('user_exists');
+        const message = "{{ message }}"; // Get the message if it exists
+    
+        if (edited_user) {
+            // Book was successfully updated
+            showModal('Success', 'User edited successfully.');
+        }
+
+        if (existing_user) {
+                // Display the message if it exists (e.g., Username already exists)
+                showModal('Error', 'Username already exists.');
+            }
+    
+        //function to show a modal with a title and content
+        function showModal(title, content) {
+                const confirmation = confirm(title + ': ' + content);
+                if (confirmation) {
+                    // Redirect to the home page if the user clicks "OK"
+                    window.location.href = '{{ url_for("admin_home") }}';
+                }
+        }
+        </script>
+    </script>
+</body>
+</html>

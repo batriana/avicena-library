@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create User</title>
+    <style>
+        body {
+            background-color: white;
+            color: #333;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        main {
+            margin-top: 70px;
+            padding: 20px;
+        }
+
+        form {
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin-top: 90px;
+            align-items: center;
+        }
+
+        .form-group {
+            flex: 0 0 48%;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            background-color: #C2B280;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 10px;
+            margin-left: auto;
+        }
+
+        .btn-primary:hover {
+            background-color: #A58E5D;
+        }
+
+        .alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        footer {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .logout-btn {
+            position: fixed;
+            top: 25px;
+            right: 30px;
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Avicena Library</h2>
+    </header>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    <main>
+        <p></p>
+        <a href="{{ url_for('admin_home') }}" style="text-decoration: none; color: #bc9055;">&larr; Back to Home</a>
+        
+        <h4>Add User</h4>
+        <form method="POST" action="{{ url_for('create_user') }}" style="width: 300px; margin: auto;">
+            {{ form.csrf_token }}
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                {{ form.username(class="form-control", required="required") }}
+            </div>
+        
+            <div class="form-group">
+                <label for="password">Password</label>
+                {{ form.password(class="form-control", required="required") }}
+            </div>
+        
+            <div class="form-group">
+                <!-- Move the admin checkbox under the password field -->
+                <label for="is_admin">{{ form.is_admin.label }}</label>
+                {{ form.is_admin }}
+            </div>
+        
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </main>
+        <!-- Display a message if it exists -->
+        <script>
+            // Check for user addition status in the URL query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const addedUser = urlParams.get('added_user');
+            const userExists = urlParams.get('user_exists');
+            const message = "{{ message }}"; // Get the message if it exists
+        
+            if (addedUser === 'true') {
+                // User was successfully added
+                showModal('Success', 'User added successfully.');
+            }
+        
+            if (userExists === 'true') {
+                // Display the message if it exists (e.g., Username already exists)
+                showModal('Error', 'Username already exists.');
+            }
+        
+            // Function to show a modal with a title and content
+            function showModal(title, content) {
+                const confirmation = confirm(title + ': ' + content);
+                if (confirmation) {
+                    // Redirect to the home page if the user clicks "OK"
+                    window.location.href = '{{ url_for("admin_home") }}';
+                }
+            }
+        </script>
+
+    <footer>
+        <p>© Avicena Library 2023</p>
+    </footer>
+</body>
+</html>

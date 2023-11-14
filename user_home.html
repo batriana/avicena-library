@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+    <style>
+        body {
+            background-color: white;
+            color: #333;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        footer {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        main {
+            margin-top: 70px;
+            padding: 20px;
+        }
+
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+    
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+    
+        th {
+            background-color: #D2B48C;
+            color: white;
+        }
+        
+        .logout-btn {
+            position: fixed;
+            top: 25px;
+            right: 30px;
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Avicena Library</h2>
+    </header>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    <main>
+        <p>Hello, {{ current_user.username }}!</p>
+        <h3>Available Books:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Volume</th>
+                    <th>Publisher</th>
+                    <th>Shelf</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.version }}</td>
+                        <td>{{ book.publisher }}</td>
+                        <td>{{ book.shelf }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+    <footer>
+        <p>© Avicena Library 2023</p>
+    </footer>
+</body>
+</html>

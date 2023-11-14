@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Home Page</title>
+    <style>
+        body {
+            background-color: white;
+            color: #333;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        footer {
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        main {
+            margin-top: 70px;
+            padding: 20px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 25px;
+            right: 30px;
+            background-color: #D2B48C;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        button {
+            background-color: #C2B280;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-left: auto; /* Adjusted property */
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #A58E5D;
+        }
+
+        
+        main {
+            margin-top: 70px;
+            padding: 20px;
+        }
+
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+    
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+    
+        th {
+            background-color: #D2B48C;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Avicena Library</h2>
+    </header>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    <main>
+        <p>Current user: {{ current_user.username }}</p>
+    <!-- Add a search bar -->
+    <form method="POST" action="{{ url_for('admin_home') }}">
+        {{ form.csrf_token }}
+        <input type="text" id="search-query" name="search_query" placeholder="Search for books">
+        <button type="submit" id="search-button">Search</button>
+        <!--<button type="button" id="clear-button">Clear Results</button>-->
+    </form>
+    
+    <!-- Add a div to display search results -->
+    <div id="search-results">
+        {% if search_results %}
+            <h4>Search Results</h4>
+            <ul>
+                {% for book in search_results %}
+                    <li>
+                        {{ book.title }} by {{ book.author }}
+                        <button type="button" onclick="window.location.href='{{ url_for('view_book', book_id=book.id) }}'" class="btn btn-primary">View Detail</button>
+                        <!-- Add other actions as needed -->
+                    </li>
+                {% endfor %}
+            </ul>
+            <button type="button" id="clear-button">Clear Results</button>
+        {% endif %}
+    </div>
+
+    <h4>Book List</h4>
+    <button type="button" onclick="window.location.href='{{ url_for('add_book') }}'" class="btn btn-primary">Add Book</button>
+
+<table class="table_book">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Version</th>
+            <th>Author</th>
+            <th>Details</th>
+            <th>Edit</th>
+            <th>Delete</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.version }}</td>
+                <td>{{ book.author }}</td>
+                
+                <td>
+                    <form method="post" action="{{ url_for('view_book', book_id=book.id) }}" style="display: inline;">
+                        {{ form.csrf_token }}
+                        <button type="submit" class="btn btn-primary btn-sm">View Details</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="{{ url_for('edit_book', book_id=book.id) }}" style="display: inline;">
+                        {{ form.csrf_token }}
+                        <button type="submit" class="btn btn-primary btn-sm">Edit</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="{{ url_for('delete_book', book_id=book.id) }}" data-book-id="{{ book.id }}" style="display: inline;">
+                        {{ form.csrf_token }}
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeleteBook('{{ book.title }}', '{{ book.id }}')">Delete</button>
+                        <button type="submit" class="btn btn-danger btn-sm" style="display: none">Confirm Delete</button>
+                    </form>
+                </td>
+                <td>
+                    <button type="submit" class="btn btn-secondary btn-sm" onclick="toggleAvailability('{{ book.id }}')">
+                        {% if book.available %}
+                            Available
+                        {% else %}
+                            Occupied
+                        {% endif %}
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<h4>Available Books</h4>
+<table class="table_book_avail">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Version</th>
+            <th>Author</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in books if book.available %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.version }}</td>
+                <td>{{ book.author }}</td>
+                <td>
+                    <form method="post" action="{{ url_for('view_book', book_id=book.id) }}" style="display: inline;">
+                        {{ form.csrf_token }}
+                        <button type="submit" class="btn btn-primary btn-sm">View Details</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+    <script>
+        //deleting book
+        function confirmDeleteBook(bookTitle, bookId) {
+            if (confirm(`Are you sure you want to delete the book "${bookTitle}"?`)) {
+                // If the user confirms, submit the form to delete the book
+                var form = document.querySelector(`form[data-book-id="${bookId}"]`);
+                form.querySelector('button[type="submit"]').click();
+            }
+        }
+        //update book availability
+        function toggleAvailability(bookId) {
+        fetch(`/toggle_availability/${bookId}`, { method: 'GET' })
+            .then(response => {
+                if (response.ok) {
+                    // Reload the page or update the UI as needed
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Error toggling book availability:', error));
+        }
+
+
+        //delete user
+        function confirmDelete(username, userId) {
+            if (confirm(`Are you sure you want to delete the user "${username}"?`)) {
+                var form = document.querySelector(`form[data-user-id="${userId}"]`);
+                form.querySelector('button[type="submit"]').click();
+            }
+        }
+
+        //clear button functionality
+        document.getElementById("clear-button").addEventListener("click", function () {
+            // Clear the search results
+            const searchResults = document.getElementById("search-results");
+            searchResults.innerHTML = '';
+
+            // Clear the search input field
+            const searchQuery = document.getElementById("search-query");
+            searchQuery.value = '';
+        });
+
+        //search func
+        document.getElementById("search-button").addEventListener("click", function () {
+        const searchQuery = document.getElementById("search-query").value;
+        const searchResults = document.getElementById("search-results");
+
+        // Send an AJAX request to the server
+        fetch('/admin_home', {
+            method: 'POST',
+            body: new URLSearchParams({ 'search_query': searchQuery }),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        })
+            .then(response => response.json())
+            .then(data => {
+                const results = data.books.map(book => `
+                    <p>Title: ${book.title}</p>
+                    <p>Author: ${book.author}</p>
+                    <p>Publisher: ${book.publisher}</p>
+                    <p>ISBN: ${book.isbn}</p>
+                    <p>Version: ${book.version}</p>
+                    <p>Shelf: ${book.shelf}</p>
+                `);
+                searchResults.innerHTML = results.join("");
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    </script>
+
+
+<h4>User List</h4>
+<button type="button" onclick="window.location.href='{{ url_for('create_user') }}'" class="btn btn-primary">Create New User</button>
+<table class="table_user">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Admin Role</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.password }}</td>
+                <td>{{user.is_admin}}</td>
+                <td>
+                    <form method="post" action="{{ url_for('edit_user', user_id=user.id) }}" style="display: inline;">
+                        {{ form.csrf_token }}
+                        <button type="submit" class="btn btn-primary btn-sm">Edit</button>
+                    </form>
+                    <form method="post" action="{{ url_for('delete_user', user_id=user.id) }}" data-user-id="{{ user.id }}" style="display: inline;">
+                        {{ form.csrf_token }}
+                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('{{ user.username }}', '{{ user.id }}')">Delete</button>
+                        <button type="submit" class="btn btn-danger btn-sm" style="display: none">Confirm Delete</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    </main>
+
+    <footer>
+        <p>© Avicena Library 2023</p>
+    </footer>
+</body>
+</html>
